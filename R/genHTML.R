@@ -23,7 +23,10 @@
 #'                 v2 = v2 <<- sort(rnorm(n)), 
 #'                 v3 = v3 <<- ifelse(v1 > 0, v1, rnorm(1)),
 #'                 v4 = v4 <<- ifelse(v2 < 0, v2, rnorm(1)))
-#' genHTML(x, "example.html")
+#' genHTML(x, "./example.html")
+#'
+#' Not Run:
+#' genHTML(ex1, "./example.html")
 #' @export
 
 
@@ -32,8 +35,8 @@ genHTML <- function(x, outfile){
   dat <- x
 
   fs <- scale(dat, center= TRUE, scale = TRUE)
-  mdat <- melt(x)
-  mdats <- data.table::melt(as.data.frame(fs))
+  mdat <- reshape::melt(x)
+  mdats <- reshape::melt(as.data.frame(fs))
   
   plty.heat <- plot_ly(z = fs, type = 'heatmap')
   
