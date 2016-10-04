@@ -1,0 +1,39 @@
+---
+title: "Rsynaptome Output:"
+author: "Rsynaptome Toolkit"
+output:
+  html_document:
+    fig_caption: yes
+    fig_height: 7
+    fig_width: 7
+    echo: FALSE
+    highlight: pygments
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+---
+
+
+```{r setup, echo = FALSE}
+opts_chunk$set(cache=FALSE, echo=FALSE, fig.height = 6, fig.width= 6,
+               warning=FALSE, message=FALSE, fig.show='hold',
+               comment="#", fig.keep='low')
+```
+
+# Heatmap of scaled data
+```{r cc-heatmap, fig.width = st.hm.w}
+plty.heat
+#eval(parse(text = st.hm))
+```
+
+# Violin Plot
+```{r cc-violin, fig.width = gg.violin.w}
+tmp <- gg.violin
+ggplotly()
+```
+
+# Correlation Plot
+```{r cc-corr}
+corrplot(cmat,method="color", tl.cex=1)
+```

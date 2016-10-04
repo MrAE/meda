@@ -1,19 +1,19 @@
 Package: Rsynaptome
 Title: Rsynaptome Toolkit
-Version: 0.2
+Version: 0.1.1.9000
 Authors@R: person("Jesse", "Patsolic", email = "jpatsol1@jhu.edu", role = c("aut", "cre"))
 Description: A toolbox for exploring synaptome data, including features,
     markers, and putative synapse locations.
 Depends:
     R (>= 3.3.1)
-License: 
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports:
-    corrplot,
-    data.table,
-    energy,
-    foreach,
-    ggplot2,
-    tidyr
+Imports: 
+  stats,
+  ggplot2,
+  rmarkdown,
+  data.table,
+  reshape,
+  plotly
 RoxygenNote: 5.0.1
