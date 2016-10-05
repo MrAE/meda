@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 ^.*\.ig$
 ^.*\inst\extdata\*.html
+^examples*

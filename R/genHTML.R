@@ -26,7 +26,8 @@
 #' genHTML(x, "./example.html")
 #'
 #' Not Run:
-#' genHTML(ex1, "./example.html")
+#' here <-  getwd()
+#' genHTML(ex1[, seq(1,144,by=6), with = FALSE], paste0(here, "/example.html"))
 #' @export
 
 
@@ -35,7 +36,7 @@ genHTML <- function(x, outfile){
   dat <- x
 
   fs <- scale(dat, center= TRUE, scale = TRUE)
-  mdat <- reshape::melt(x)
+  mdat <- reshape::melt(as.data.frame(x))
   mdats <- reshape::melt(as.data.frame(fs))
   
   plty.heat <- plot_ly(z = fs, type = 'heatmap')
