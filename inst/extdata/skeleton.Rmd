@@ -29,8 +29,12 @@ plty.heat
 
 # Violin Plot
 ```{r cc-violin, fig.width = gg.violin.w}
-tmp <- gg.violin
-ggplotly()
+if(pltly){
+  tmp <- gg.violin
+  ggplotly()
+} else {
+  print(gg.violin) 
+}
 ```
 
 # Correlation Plot

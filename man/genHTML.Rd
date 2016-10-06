@@ -13,13 +13,14 @@ genHTML(x, outfile)
 file.}
 }
 \value{
-An html document
+An html document.
 }
 \description{
 Generate Rmarkdown
 }
 \details{
-Stuff to go here soon
+Generates an html file of various exploratory plots via
+RMarkdown.
 }
 \examples{
 require(Rsynaptome)
@@ -29,7 +30,12 @@ x <- data.frame(v1 = v1 <<- sort(runif(n)),
                 v2 = v2 <<- sort(rnorm(n)), 
                 v3 = v3 <<- ifelse(v1 > 0, v1, rnorm(1)),
                 v4 = v4 <<- ifelse(v2 < 0, v2, rnorm(1)))
-genHTML(x, "example.html")
+genHTML(x, outfile = "~/Desktop/ex.html")
+
+\dontrun{
+here <-  getwd()
+genHTML(ex1[, seq(1,144,by=6), with = FALSE], paste0(here, "/example.html"))
+}
 }
 \seealso{
 \code{\link[rmarkdown]{render}}

@@ -1,13 +1,16 @@
 # README
 
-This is an R package for exploratory data analysis specifically tuned
-for synaptomics data. 
+meda: Matrix Exploratory Data Analysis is an R package for exploring
+data in the form of matrices.
 
 # INSTALLATION
 
-Download or clone the repository and uncompress the zip folder.
-At command line `cd` to the location of the folder and run 
-> R CMD INSTALL \<folder name\>
+To download and install run the following in R:
+
+```R
+devtools::install_github("mrae/meda")
+```
+
 ----------------
 
 ### Given a new set of n putative synapse locations in R^3 with d markers in R(?)
