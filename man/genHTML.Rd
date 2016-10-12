@@ -2,40 +2,46 @@
 % Please edit documentation in R/genHTML.R
 \name{genHTML}
 \alias{genHTML}
-\title{Generate Rmarkdown}
+\title{Generate an Rmarkdown with exploratory plots}
 \usage{
-genHTML(x, outfile)
+genHTML(x, outfile, use.plotly = TRUE, scale = TRUE)
 }
 \arguments{
 \item{x}{data}
 
 \item{outfile}{A string denoting the location to put the output html
 file.}
+
+\item{use.plotly}{A Boolean to specify if ggplotly is used.}
+
+\item{scale}{A Boolean to specify whether column-wise scaling is
+performed before analysis.}
 }
 \value{
 An html document.
 }
 \description{
-Generate Rmarkdown
+Generate an Rmarkdown with exploratory plots
 }
 \details{
 Generates an html file of various exploratory plots via
-RMarkdown.
+RMarkdown. "There is no excuse for failing to plot and look." ~ J. W.
+Tukey (Exploratory Data Analysis, p 43)
 }
 \examples{
-require(Rsynaptome)
-set.seed(13)
+require(meda)
+set.seed(73)
 n <- 100
-x <- data.frame(v1 = v1 <<- sort(runif(n)), 
-                v2 = v2 <<- sort(rnorm(n)), 
-                v3 = v3 <<- ifelse(v1 > 0, v1, rnorm(1)),
-                v4 = v4 <<- ifelse(v2 < 0, v2, rnorm(1)))
-genHTML(x, outfile = "~/Desktop/ex.html")
+p <- 48
+x <- data.frame(matrix(runif(n*p) + rnorm(n*p, sd = 0.01), nrow = n, ncol = p))
+colnames(x)  <- state.name[1:dim(x)[2]]
 
-\dontrun{
-here <-  getwd()
-genHTML(ex1[, seq(1,144,by=6), with = FALSE], paste0(here, "/example.html"))
-}
+outfile <- "./ex.html"
+use.plotly <- FALSE; scale <- TRUE
+x <- iris[, -5]
+genHTML(x, outfile, use.plotly = FALSE, scale = TRUE)
+
+
 }
 \seealso{
 \code{\link[rmarkdown]{render}}

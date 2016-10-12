@@ -4,8 +4,8 @@ author: "Rsynaptome Toolkit"
 output:
   html_document:
     fig_caption: yes
-    fig_height: 7
-    fig_width: 7
+    fig_height: 8
+    fig_width: 8
     echo: FALSE
     highlight: pygments
     number_sections: yes
@@ -22,22 +22,62 @@ opts_chunk$set(cache=FALSE, echo=FALSE, fig.height = 6, fig.width= 6,
 ```
 
 # Heatmap of scaled data
-```{r cc-heatmap, fig.width = st.hm.w}
-plty.heat
-#eval(parse(text = st.hm))
+```{r cc-heatmap}
+if(use.plotly){
+  tryCatch(ggplotly(p.heat(dat, TRUE)))
+} else {
+  tryCatch(p.heat(dat, FALSE))
+}
 ```
 
 # Violin Plot
-```{r cc-violin, fig.width = gg.violin.w}
-if(pltly){
-  tmp <- gg.violin
-  ggplotly()
+```{r cc-violin, fig.height = gg.violin.h, fig.width = gg.violin.w}
+if(use.plotly){
+  tryCatch(ggplotly(p.violin(dat)))
 } else {
-  print(gg.violin) 
+  tryCatch(print(p.violin(dat)))
 }
 ```
 
 # Correlation Plot
 ```{r cc-corr}
-corrplot(cmat,method="color", tl.cex=1)
+tryCatch(p.cor(dat))
 ```
+
+# Outlier Plots
+```{r cc-outlier}
+if(use.plotly){
+  tryCatch(ggplotly(p.outlier(dat)))
+} else {
+  tryCatch(print(p.outlier(dat)))
+}
+
+```{r cc-which}
+if(!is.null(dim(dat[outliers, ]))){
+  if(use.plotly){
+    tryCatch(ggplotly(p.heat(dat[outliers, ], FALSE)))
+  } else {
+    tryCatch(print(p.heat(dat[outliers, ], FALSE)))
+  }
+}
+```
+
+# Cumulative Variance 
+```{r cc-cumsum}
+if(use.plotly){
+  tryCatch(ggplotly(p.cumvar(dat)))
+} else {
+  tryCatch(print(p.cumvar(dat)))
+}
+```
+
+# Pairs Plots 
+```{r cc-pairs, fig.height = 8, fig.width = 8}
+tryCatch(p.pairs(dat))
+```
+
+# BIC Plot
+```{r cc-bic}
+tryCatch(p.bic(dat))
+```
+
