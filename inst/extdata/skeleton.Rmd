@@ -1,6 +1,6 @@
 ---
-title: "Rsynaptome Output:"
-author: "Rsynaptome Toolkit"
+title: "MEDA Output:"
+author: "MEDA"
 output:
   html_document:
     fig_caption: yes
@@ -11,53 +11,68 @@ output:
     number_sections: yes
     theme: cerulean
     toc: yes
-    toc_depth: 3
 ---
 
 
 ```{r setup, echo = FALSE}
-opts_chunk$set(cache=FALSE, echo=FALSE, fig.height = 6, fig.width= 6,
+opts_chunk$set(cache=FALSE, echo=FALSE, fig.height = 8, fig.width= 8,
                warning=FALSE, message=FALSE, fig.show='hold',
                comment="#", fig.keep='low')
+```
+
+# Structure
+## Column types
+```{r cc-str1, results = 'hold'}
+print(colStr)
+```
+## Missing values, NAs, and Negatives
+```{r cc-str2, results = 'hold'}
+print(paste("Are all rows complete?:", complete))
+print(paste("Are there any NAs?:", nas))
+print(paste("Are any values negative?:", negs))
+```
+```{r cc-str3, results = 'hold'}
+if(p <= 12) { print("Structure"); str(dat) }
 ```
 
 # Heatmap of scaled data
 ```{r cc-heatmap}
 if(use.plotly){
-  tryCatch(ggplotly(p.heat(dat, TRUE)))
+  p.try(p.heat, dat, TRUE)
 } else {
-  tryCatch(p.heat(dat, FALSE))
+  tryCatch(ggplotly(p.try(p.heat, dat, FALSE)))
 }
 ```
 
 # Violin Plot
-```{r cc-violin, fig.height = gg.violin.h, fig.width = gg.violin.w}
+```{r cc-violin}
 if(use.plotly){
-  tryCatch(ggplotly(p.violin(dat)))
+  tryCatch(ggplotly(p.try(p.violin, dat)))
 } else {
-  tryCatch(print(p.violin(dat)))
+  p.try(p.violin, dat)
 }
 ```
 
 # Correlation Plot
 ```{r cc-corr}
-tryCatch(p.cor(dat))
+tryCatch(do.call(corrplot, p.cor(dat)))
 ```
 
 # Outlier Plots
 ```{r cc-outlier}
 if(use.plotly){
-  tryCatch(ggplotly(p.outlier(dat)))
+  ggplotly(p.try(p.outlier, dat))
 } else {
-  tryCatch(print(p.outlier(dat)))
+  p.try(p.outlier, dat)
 }
+```
 
 ```{r cc-which}
-if(!is.null(dim(dat[outliers, ]))){
-  if(use.plotly){
-    tryCatch(ggplotly(p.heat(dat[outliers, ], FALSE)))
+if(exists('outliers') & length(outliers) > 1){
+  if(use.plotly) {
+  p.try(p.heat, dat[outliers, ], TRUE)
   } else {
-    tryCatch(print(p.heat(dat[outliers, ], FALSE)))
+    ggplotly(p.try(p.heat, dat[outliers, ], FALSE))
   }
 }
 ```
@@ -65,19 +80,28 @@ if(!is.null(dim(dat[outliers, ]))){
 # Cumulative Variance 
 ```{r cc-cumsum}
 if(use.plotly){
-  tryCatch(ggplotly(p.cumvar(dat)))
+  tryCatch(ggplotly(p.try(p.cumvar, dat)))
 } else {
-  tryCatch(print(p.cumvar(dat)))
+  p.try(p.cumvar, dat)
 }
 ```
 
 # Pairs Plots 
 ```{r cc-pairs, fig.height = 8, fig.width = 8}
-tryCatch(p.pairs(dat))
+p.try(p.pairs, dat)
 ```
 
-# BIC Plot
+# BIC Plots 
 ```{r cc-bic}
-tryCatch(p.bic(dat))
+p.try(p.bic, dat)
 ```
+
+# Mclust classifications
+```{r cc-mclust}
+p.try(p.mclust, dat)
+```
+
+
+
+
 

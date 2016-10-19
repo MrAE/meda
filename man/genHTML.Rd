@@ -4,7 +4,7 @@
 \alias{genHTML}
 \title{Generate an Rmarkdown with exploratory plots}
 \usage{
-genHTML(x, outfile, use.plotly = TRUE, scale = TRUE)
+genHTML(x, outfile, use.plotly = TRUE, scale = TRUE, samp = 10000)
 }
 \arguments{
 \item{x}{data}
@@ -16,9 +16,12 @@ file.}
 
 \item{scale}{A Boolean to specify whether column-wise scaling is
 performed before analysis.}
+
+\item{samp}{An integer specifying the size of the random sample to be
+taken if the number of points exceeds 1e5.}
 }
 \value{
-An html document.
+An html document via RMarkdown.
 }
 \description{
 Generate an Rmarkdown with exploratory plots
@@ -30,17 +33,18 @@ Tukey (Exploratory Data Analysis, p 43)
 }
 \examples{
 require(meda)
-set.seed(73)
-n <- 100
-p <- 48
-x <- data.frame(matrix(runif(n*p) + rnorm(n*p, sd = 0.01), nrow = n, ncol = p))
-colnames(x)  <- state.name[1:dim(x)[2]]
-
-outfile <- "./ex.html"
-use.plotly <- FALSE; scale <- TRUE
 x <- iris[, -5]
-genHTML(x, outfile, use.plotly = FALSE, scale = TRUE)
-
+y <- data.frame(matrix(rnorm(1e3*24, mean = rep(c(1,4,2,5), each =
+1e3), sd = 0.25), ncol = 24))
+outfile.1 <- paste0(getwd(), '/ex1.html')
+outfile.2 <- paste0(getwd(), '/ex2.html')
+use.plotly <- FALSE
+scale <- TRUE
+print("Now run 'genHTML(x, outfile, use.plotly, scale)'")
+\dontrun{
+genHTML(x, outfile.1, use.plotl = TRUE, scale)
+genHTML(W, outfile, use.plotl = TRUE, scale)
+}
 
 }
 \seealso{

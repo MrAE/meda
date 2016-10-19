@@ -6,8 +6,10 @@
 #' @param use.plotly A Boolean to specify if ggplotly is used.
 #' @param scale A Boolean to specify whether column-wise scaling is
 #' performed before analysis.
+#' @param samp An integer specifying the size of the random sample to be
+#' taken if the number of points exceeds 1e5.
 #' 
-#' @return An html document.
+#' @return An html document via RMarkdown.
 #'
 #' @details Generates an html file of various exploratory plots via
 #' RMarkdown. "There is no excuse for failing to plot and look." ~ J. W.
@@ -15,47 +17,84 @@
 #'       
 #' @seealso \code{\link[rmarkdown]{render}}
 #'
-#' @importFrom stats cor mahalanobis
+#' @importFrom graphics pairs plot
+#' @importFrom grDevices gray.colors
 #' @importFrom rmarkdown render
 #' @importFrom plotly plot_ly
-#' @importFrom mclust bic
+#' @importFrom mclust bic Mclust
+#' @importFrom robustbase covMcd
 #' @import knitr
 #' @import ggplot2
+#' @import stats
+#' @import corrplot
+#'
 #' @examples
 #' require(meda)
-#' set.seed(73)
-#' n <- 100
-#' p <- 48
-#' x <- data.frame(matrix(runif(n*p) + rnorm(n*p, sd = 0.01), nrow = n, ncol = p))
-#' colnames(x)  <- state.name[1:dim(x)[2]]
-#'
-#' outfile <- "./ex.html"
-#' use.plotly <- FALSE; scale <- TRUE
 #' x <- iris[, -5]
-#' genHTML(x, outfile, use.plotly = FALSE, scale = TRUE)
-#'
+#' y <- data.frame(matrix(rnorm(1e3*24, mean = rep(c(1,4,2,5), each =
+#' 1e3), sd = 0.25), ncol = 24))
+#' outfile.1 <- paste0(getwd(), '/ex1.html')
+#' outfile.2 <- paste0(getwd(), '/ex2.html')
+#' use.plotly <- FALSE
+#' scale <- TRUE
+#' print("Now run 'genHTML(x, outfile, use.plotly, scale)'")
+#' \dontrun{
+#' genHTML(x, outfile.1, use.plotl = TRUE, scale)
+#' genHTML(W, outfile, use.plotl = TRUE, scale)
+#' }
 #'
 #' @export
 
 
-genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE){
+genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE, samp = 1e4) {
 
-  n <<- dim(x)[1]
-  p <<- dim(x)[2]
+  use.plotly <- use.plotly
+  n <- dim(x)[1]
+  p <- dim(x)[2]
 
-  gg.violin.h <<- ifelse(p > 12, p/1.8,8)
-  gg.violin.w <<- ifelse(n > 24, 12, 6)
-
-  use.plotly <<- use.plotly
+  if(n > 1e5) {
+    x <- x[sample(n, samp), ] 
+    n <- samp
+  }
 
   if(scale){
-    dat <<- scale(x, center = TRUE, scale = TRUE) 
+    dat <- scale(x, center = TRUE, scale = TRUE) 
   } else {
-    dat <<- x
+    dat <- x
   }
  
+  p.try <- function(FUN, dat, use.plotly = NULL) {
+    out <- tryCatch(
+      {
+        if(is.null(use.plotly)) {
+          do.call(FUN, args = list(dat = dat))
+          } else {
+          do.call(FUN, args = list(dat = dat, use.plotly = use.plotly))
+          }
+      },
+      error = function(cond) {
+        message("Something bad happend, check your data and try again.")
+        message(cond)
+        return(NA)
+      },
+      warning = function(cond) {
+        message("Function returned a warning, check your data and try again.")
+        message(cond)
+        return(NULL)
+      }
+    )
+    return(out)
+  }
+
+  ### Structure of Data
+  colStr <- table(Reduce(c,lapply(as.data.frame(dat), class)))
+  complete <- all(complete.cases(dat))
+  nas <- anyNA(dat)
+  negs <- any(dat < 0)
+
   ### Heatmaps 
   p.heat <- function(dat, use.plotly){
+    out <- 
     if(use.plotly){ 
       plty.heat <- plot_ly(z = dat, type = 'heatmap')
       return(plty.heat)
@@ -79,7 +118,7 @@ genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE){
   }
 
   ### Violin plots
-  p.violin <- function(dat){
+  p.violin <- function(dat, use.plotly) {
     mdat <- data.table::melt(as.data.frame(dat), id = NULL)
     gg <- ggplot(mdat, aes(x = factor(variable), y = value))
     
@@ -94,40 +133,36 @@ genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE){
 
 
   ### Correlation plots 
-  p.cor <- function(dat){
-    cmat <- cor(dat)
-    return(corrplot(cmat, method="color", tl.cex=1))
+  p.cor <- function(dat) {
+    out <- list(corr = cor(dat), method = "color", tl.cex = 1)
+    return(out)
   }
 
 
   ### Outlier plots
   p.outlier <- function(dat) {
-   
-    M2 <- data.frame(mx2 = mahalanobis(dat, 
-                                       center = apply(dat, 2, mean), 
-                                       cov = cov(dat)))
 
-    gg.outlier <- if(diff(range(M2)) > .9e3){
-      ggplot(M2, aes(x = "", y = mx2)) + 
-        geom_boxplot(outlier.color = 'red') + 
-        scale_y_log10() + coord_flip() + ylab(expression(Mahalanobis^2))
-      } else {
-      ggplot(M2, aes(x = "", y = mx2)) + 
-        geom_boxplot(outlier.color = 'red') + ylab(expression(Mahalanobis^2))
-      }
+    ## Create data.frame of robust distances (rd) 
+    ## as in Hubert et al. 2008
+    ## calculated with FAST MCD or covOGK
+    mcd <- covMcd(dat)
+    tmp <- 1:dim(dat)[1]
 
-    #iqr <- IQR(M2$mx2)
-    #h <- quantile(M2$mx2, prob = c(0.25, 0.75))
-    #bounds <- c(h[1] - 1.5 * iqr, h[2] + 1.5 * iqr)
-    #
-    #outliers <<- which(M2$mx2 < bounds[1] | M2$mx2 > bounds[2])
+    mx <- sqrt(mahalanobis(dat, center = mcd$center, cov = mcd$cov))
+    rd <- data.frame(index = as.integer(tmp), rd = mx) 
+
+    alev <- 0.01
+	  aline <- sqrt(qchisq(1 - alev / 100, p, ncp = 0, lower.tail = TRUE, log.p = FALSE))
+
+    gg.outlier <- 
+      ggplot(data = rd, aes(x = index, y = mx)) + 
+    	  geom_point() + 
+        geom_hline(yintercept = aline) + 
+        ggtitle("Robust Distances of the data") +
+        ylab("Robust Distances")
 
     return(gg.outlier)
-    }
-
-    
-
-    #gg.kdeM2 <- ggplot(M2, aes(x = mx2, y = ..density..)) + geom_density()
+    } ## END p.outlier
 
   ### Cumulative variance
   p.cumvar <- function(dat){
@@ -152,29 +187,36 @@ genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE){
   }
 
   ### Pairs Plots
-  p.pairs <- function(dat){
+  p.pairs <- function(dat) {
     pca <- prcomp(dat, center = TRUE, scale = TRUE)
     du <- ifelse(dim(pca$x)[2] > 8, 8, dim(pca$x)[2])
     
-    pairs(dat[, 1:du], main = "Pairs plot of first 8 dimensions")
-    pairs(pca$x[,1:du], main = "Pairs plot of first 8 PCs")
+    pairs(dat[, 1:du], pch = '.',  main = "Pairs plot of first 8 dimensions")
+    pairs(pca$x[,1:du], pch = '.', main = "Pairs plot of first 8 PCs")
   }
 
 
   ### BIC plot
-  p.bic <- function(dat){
-    bic <- mclust::mclustBIC(dat, G = 1:10)
-    plot(bic) 
+  p.bic <- function(dat, timeLimit = 8*60 ) {
+    local({
+      setTimeLimit(cpu = timeLimit, transient = FALSE)
+      bicO <<- mclust::mclustBIC(dat, G = 1:10)
+    })
+    print(summary(bicO))
+    plot(bicO) 
   }
   
-  
+  ### Mclust Classifications 
+  p.mclust <- function(dat) {
+    if(dim(dat)[1] > 1e5 & dim(dat)[2] > 100){
+      stop("Dimensions are too large.")
+      } else {
+       mod1 <- Mclust(dat, x = bicO)
+       plot(mod1, "classification") 
+      }
+  }
+
   rmd <- system.file("extdata", "skeleton.Rmd", package = "meda")
 
   render(rmd, output_file = outfile)
 }
-
-
-
-
-
-
