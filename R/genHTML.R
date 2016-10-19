@@ -140,7 +140,7 @@ genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE, samp = 1e4) {
 
 
   ### Outlier plots
-  p.outlier <- function(dat) {
+  p.outlier <- function(dat, alev = 0.01) {
 
     ## Create data.frame of robust distances (rd) 
     ## as in Hubert et al. 2008
@@ -149,14 +149,16 @@ genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE, samp = 1e4) {
     tmp <- 1:dim(dat)[1]
 
     mx <- sqrt(mahalanobis(dat, center = mcd$center, cov = mcd$cov))
-    rd <- data.frame(index = as.integer(tmp), rd = mx) 
+    RD <- data.frame(index = as.integer(tmp), rd = mx) 
 
-    alev <- 0.01
 	  aline <- sqrt(qchisq(1 - alev / 100, p, ncp = 0, lower.tail = TRUE, log.p = FALSE))
+    RD$outlier <- factor(RD$rd < aline, labels = c("outlier", "inlier"))
 
     gg.outlier <- 
-      ggplot(data = rd, aes(x = index, y = mx)) + 
+      ggplot(data = RD, aes(x = index, y = rd, color = outlier )) + 
     	  geom_point() + 
+        labs(list(color = 
+          bquote(paste("Outliers at level ", alpha, "=", .(alev))))) +
         geom_hline(yintercept = aline) + 
         ggtitle("Robust Distances of the data") +
         ylab("Robust Distances")

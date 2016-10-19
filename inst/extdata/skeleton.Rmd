@@ -67,16 +67,6 @@ if(use.plotly){
 }
 ```
 
-```{r cc-which}
-if(exists('outliers') & length(outliers) > 1){
-  if(use.plotly) {
-  p.try(p.heat, dat[outliers, ], TRUE)
-  } else {
-    ggplotly(p.try(p.heat, dat[outliers, ], FALSE))
-  }
-}
-```
-
 # Cumulative Variance 
 ```{r cc-cumsum}
 if(use.plotly){
