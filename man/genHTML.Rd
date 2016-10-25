@@ -36,14 +36,15 @@ require(meda)
 x <- iris[, -5]
 y <- data.frame(matrix(rnorm(1e3*24, mean = rep(c(1,4,2,5), each =
 1e3), sd = 0.25), ncol = 24))
-outfile.1 <- paste0(getwd(), '/ex1.html')
+outfile.1 <- paste0('~/Desktop/ex1.html')
 outfile.2 <- paste0(getwd(), '/ex2.html')
 use.plotly <- FALSE
 scale <- TRUE
 print("Now run 'genHTML(x, outfile, use.plotly, scale)'")
 \dontrun{
-genHTML(x, outfile.1, use.plotl = TRUE, scale)
-genHTML(W, outfile, use.plotl = TRUE, scale)
+x <- ex1[, 1:24, with = FALSE]
+genHTML(x, outfile.1, use.plotly, scale)
+genHTML(x, outfile.2, use.plotly, scale)
 }
 
 }

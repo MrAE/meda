@@ -33,14 +33,15 @@
 #' x <- iris[, -5]
 #' y <- data.frame(matrix(rnorm(1e3*24, mean = rep(c(1,4,2,5), each =
 #' 1e3), sd = 0.25), ncol = 24))
-#' outfile.1 <- paste0(getwd(), '/ex1.html')
+#' outfile.1 <- paste0('~/Desktop/ex1.html')
 #' outfile.2 <- paste0(getwd(), '/ex2.html')
 #' use.plotly <- FALSE
 #' scale <- TRUE
 #' print("Now run 'genHTML(x, outfile, use.plotly, scale)'")
 #' \dontrun{
-#' genHTML(x, outfile.1, use.plotl = TRUE, scale)
-#' genHTML(W, outfile, use.plotl = TRUE, scale)
+#' x <- ex1[, 1:24, with = FALSE]
+#' genHTML(x, outfile.1, use.plotly, scale)
+#' genHTML(x, outfile.2, use.plotly, scale)
 #' }
 #'
 #' @export
@@ -63,6 +64,9 @@ genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE, samp = 1e4) {
     dat <- x
   }
  
+  maxchar <- max(nchar(as.character(colnames(dat))))
+  #ifelse(maxchar > 8, 
+
   p.try <- function(FUN, dat, use.plotly = NULL) {
     out <- tryCatch(
       {
@@ -110,7 +114,7 @@ genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE, samp = 1e4) {
         geom_raster() + scale_y_reverse(expand = c(0,0)) + 
         scale_fill_gradientn(colours = gray.colors(255, start = 0)) +
         xlab("") + ylab("index") +
-        theme(axis.text.x = element_text(angle = 90, vjust = 0.5), 
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5), 
               panel.background = element_blank())
 
       return(gg.heat)
@@ -176,12 +180,14 @@ genHTML <- function(x, outfile, use.plotly = TRUE, scale = TRUE, samp = 1e4) {
     CS <- data.frame(index = 1:(dim(pca$x)[2]), cs = (100*cumsum(pca$sdev / sum(pca$sdev))))
     CS$col <- "" 
     tryCatch(CS$col[elb] <- "elbow")
-   
+    CS$col <- as.factor(CS$col)
+
+     
     gg.cumvar <- 
       ggplot(CS, aes(x = index, y = cs)) + 
-      geom_point(aes(color = col)) + 
       scale_color_manual(values = c("black", "red")) + 
       geom_line() + 
+      geom_point(aes(color = col, size = col)) + 
       ylab("% Cumulative Variance") + 
       ggtitle("Cumulative Sum of variace in PC's")
 
